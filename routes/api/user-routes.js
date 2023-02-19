@@ -74,7 +74,6 @@ router.delete('/:userId', (req,res)=> {
 
 //TODO - ROUTE THAT ADDS A FRIEND TO A USER
 router.put('/:userId/friends/:friendId', (req,res)=> {
-
 })
 
 //TODO - ROUTE THAT DELETES A FRIEND FROM A USER'S FRIENDS, DONT DELETE THE FRIEND AS A USER THOUGH!

@@ -1,6 +1,6 @@
 
 const router = require('express').Router();
-const { Thought, Reaction} = require('../../models')
+const { Thought, Reaction, User} = require('../../models')
 
 //TODO: ROUTE TO GET ALL THOUGHTS
 router.get('/', (req,res)=> {
@@ -16,8 +16,15 @@ router.get('/', (req,res)=> {
 
 //TODO: ROUTE TO CREATE A NEW THOUGHT
 router.post('/', (req,res)=> {
-    const newThought = new Thought({ thoughtText: req.body.thoughtText, username: req.body.username });
+    const newThought = new Thought(
+      { thoughtText: req.body.thoughtText, username: req.body.username },
+      );
     newThought.save();
+    User.findOneAndUpdate(
+      { username: newThought.username },
+      { $push: { thought: newThought._id } },
+      { new: true }
+    );
     if (newThought) {
       res.status(200).json(newThought);
     } else {
@@ -74,7 +81,24 @@ router.delete('/:thoughtId', (req,res)=> {
 
 //TODO: ROUTE TO ADD REACTION TO A THOUGHT
 router.post('/:thoughtId/reactions', (req,res)=> {
-
+  Reaction.create(req.body)
+  .then((reaction) => {
+    return Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $push: { reaction: reaction._id } },
+      { new: true }
+    );
+  })
+  .then((thought) =>
+    !thought
+      ? res
+          .status(404)
+          .json({ message: 'reaction created, but no thoughts with this ID' })
+      : res.json({ message: 'reaction created' })
+  )
+  .catch((err) => {
+    console.error(err);
+  });
 });
 
 //TODO: ROUTE TO DELETE A REACTION ON A THOUGHT
