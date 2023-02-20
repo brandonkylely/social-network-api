@@ -15,14 +15,13 @@ router.get('/', (req,res)=> {
 })
 
 //TODO: ROUTE TO CREATE A NEW THOUGHT
-router.post('/', (req,res)=> {
-    const newThought = new Thought(
-      { thoughtText: req.body.thoughtText, username: req.body.username },
-      );
-    newThought.save();
-    User.findOneAndUpdate(
-      { username: newThought.username },
-      { $push: { thought: newThought._id } },
+router.post('/', async (req,res)=> {
+    console.log(req.body);
+    const newThought = await Thought.create(req.body)
+    console.log(newThought)
+    await User.findOneAndUpdate(
+      { _id: req.body.userId },
+      { $push: { thoughts: newThought._id } },
       { new: true }
     );
     if (newThought) {
