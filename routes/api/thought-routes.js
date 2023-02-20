@@ -21,7 +21,7 @@ router.post('/', async (req,res)=> {
     console.log(newThought)
     await User.findOneAndUpdate(
       { username: req.body.username },
-      { $push: { thoughts: newThought._id } },
+      { $push: { thoughts: newThought } },
       { new: true }
     );
     if (newThought) {
@@ -67,7 +67,7 @@ router.delete('/:thoughtId', (req,res)=> {
   Thought.findOneAndRemove({ _id: req.params.thoughtId })
   .then((thought) =>
     !thought
-      ? res.status(404).json({ message: 'No video with this id!' })
+      ? res.status(404).json({ message: 'No thought with this id!' })
       : User.findOneAndUpdate(
           { thoughts: req.params.thoughtId },
           { $pull: { thoughts: req.params.thoughtId } },
@@ -85,40 +85,36 @@ router.delete('/:thoughtId', (req,res)=> {
 });
 
 //TODO: ROUTE TO ADD REACTION TO A THOUGHT
-router.post('/:thoughtId/reactions', (req,res)=> {
-  Reaction.create(req.body)
-  .then((reaction) => {
-    return Thought.findOneAndUpdate(
-      { _id: req.params.thoughtId },
-      { $push: { reaction: reaction._id } },
-      { runValidators: true, new: true }
-    );
-  })
-  .then((thought) =>
-    !thought
-      ? res
-          .status(404)
-          .json({ message: 'reaction created, but no thoughts with this ID' })
-      : res.json({ message: 'reaction created' })
+router.post('/:thoughtId/reactions', async (req,res)=> {
+  const newReaction = await Reaction.create(req.body);
+  await Thought.findByIdAndUpdate(
+    { _id: req.params.thoughtId },
+    { $push: { reactions: newReaction } },
+    { runValidators: true, new: true }
   )
-  .catch((err) => {
-    console.error(err);
-  });
+
+  if (newReaction) {
+    res.status(200).json(newReaction);
+  } else {
+    console.log('Uh Oh, something went wrong');
+    res.status(500).json({ message: 'something went wrong' });
+  }
+
 });
 
 //TODO: ROUTE TO DELETE A REACTION ON A THOUGHT
-router.delete('/:thoughtId/reactions/:reactionId', (req,res)=> {
-  Thought.findOneAndUpdate(
+router.delete('/:thoughtId/reactions/:reactionId', async (req,res)=> {
+ const updatedThought = await Thought.findOneAndUpdate(
     { _id: req.params.thoughtId },
     { $pull: { reactions: { _id: req.params.reactionId } } },
     { runValidators: true, new: true }
   )
-    .then((reaction) =>
-      !reaction
-        ? res.status(404).json({ message: 'No reaction with this id!' })
-        : res.json(reaction)
-    )
-    .catch((err) => res.status(500).json(err));
+  if (updatedThought) {
+    res.status(200).json(updatedThought);
+  } else {
+    console.log('Uh Oh, something went wrong');
+    res.status(500).json({ message: 'something went wrong' });
+  }
 }
 )
 
