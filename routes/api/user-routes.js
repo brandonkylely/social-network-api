@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const {User} = require("../../models")
 
-//TODO - ROUTE THAT GETS ALL THE USERS, include friends?
+//GETS ALL THE USERS
 router.get('/', (req,res)=> {
     User.find({}, (err, result) => {
         if (result) {
@@ -14,7 +14,7 @@ router.get('/', (req,res)=> {
       });
 })
 
-//TODO - ROUTE THAT CREATES A NEW USER
+//CREATES A NEW USER
 router.post('/', async(req,res)=> {
     console.log(req.body);
     const newUser = await User.create(req.body)
@@ -27,7 +27,7 @@ router.post('/', async(req,res)=> {
     }
 });
 
-//TODO - ROUTE THAT GETS A SINGLE USER BASED ON USER ID
+//GETS A SINGLE USER BASED ON USER ID
 router.get('/:userId', (req,res) => {
     User.findOne({ _id: req.params.userId }, (err, result) => {
         if (result) {
@@ -39,7 +39,7 @@ router.get('/:userId', (req,res) => {
       });
 })
 
-//TODO - ROUTE THAT UPDATES A SINGLE USER
+//UPDATES A SINGLE USER
 router.put('/:userId', (req,res)=> {
     User.findOneAndUpdate(
         { _id: req.params.userId },
@@ -57,7 +57,7 @@ router.put('/:userId', (req,res)=> {
       );
 })
 
-//TODO - ROUTE THAT DELETES A SINGLE USER BASED ON USER ID
+//DELETES A SINGLE USER BASED ON USER ID
 router.delete('/:userId', (req,res)=> {
     User.findOneAndDelete(
         { name: req.params.userId },
@@ -73,7 +73,7 @@ router.delete('/:userId', (req,res)=> {
       );
 });
 
-//TODO - ROUTE THAT ADDS A FRIEND TO A USER
+//ADDS A FRIEND TO A USER
 router.put('/:userId/friends/:friendId', async (req,res)=> {
   const newFriend = await User.findOneAndUpdate(
     { _id: req.params.userId },
@@ -94,7 +94,7 @@ router.put('/:userId/friends/:friendId', async (req,res)=> {
   }
 })
 
-//TODO - ROUTE THAT DELETES A FRIEND FROM A USER'S FRIENDS, DONT DELETE THE FRIEND AS A USER THOUGH!
+//DELETES A FRIEND FROM A USER'S FRIENDS, DONT DELETE THE FRIEND AS A USER THOUGH!
 router.delete('/:userId/friends/:friendId', async (req,res)=> {
   const newFriend = await User.findOneAndUpdate(
     { _id: req.params.userId },

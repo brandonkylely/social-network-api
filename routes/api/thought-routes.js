@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { Thought, Reaction, User} = require('../../models')
 
-//TODO: ROUTE TO GET ALL THOUGHTS
+//GET ALL THOUGHTS
 router.get('/', (req,res)=> {
     Thought.find({}, (err, result) => {
         if (result) {
@@ -14,7 +14,7 @@ router.get('/', (req,res)=> {
       });
 })
 
-//TODO: ROUTE TO CREATE A NEW THOUGHT
+//CREATE A NEW THOUGHT
 router.post('/', async (req,res)=> {
     console.log(req.body);
     const newThought = await Thought.create(req.body)
@@ -32,7 +32,7 @@ router.post('/', async (req,res)=> {
     }
 });
 
-//TODO: ROUTE TO GET SINGLE THOUGHT BASED ON THOUGHT ID
+//GET SINGLE THOUGHT BASED ON THOUGHT ID
 router.get('/:thoughtId', (req,res)=> {
     Thought.findOne({ _id: req.params.thoughtId }, (err, result) => {
         if (result) {
@@ -44,7 +44,7 @@ router.get('/:thoughtId', (req,res)=> {
       });
 })
 
-//TODO: ROUTE TO UPDATE A THOUGHT
+//UPDATE A THOUGHT
 router.put('/:thoughtId', (req,res)=> {
     Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
@@ -62,29 +62,30 @@ router.put('/:thoughtId', (req,res)=> {
       );
 })
 
-//TODO: ROUTE TO DELETE A THOUGHT BASED ON THOUGHT ID
+//DELETE A THOUGHT BASED ON THOUGHT ID
 router.delete('/:thoughtId', (req,res)=> {
- Thought.findOneAndRemove({ _id: req.params.thoughtId })
+Thought.findOneAndDelete({ _id: req.params.thoughtId })
   .then((thought) =>
+  // console.log(thought)
     !thought
       ? res.status(404).json({ message: 'No thought with this id!' })
       : User.findOneAndUpdate(
-          { thoughts: req.params.thoughtId },
-          { $pull: { thoughts: req.params.thoughtId } },
-          { new: true }
+          { username: thought.username },
+          { $pull: { thoughts: {_id: req.params.thoughtId}} },
+          { runValidators: true, new: true },
         )
-  )
-  .then((user) =>
+  ).then((user) =>
     !user
       ? res
           .status(404)
-          .json({ message: 'Thought deleted but no user with this id!' })
+          .json({ message: 'Thought deleted, but user does not exist' })
       : res.json({ message: 'Thought successfully deleted!' })
   )
   .catch((err) => res.status(500).json(err));
+  // console.log(req.params.thoughtId)
 });
 
-//TODO: ROUTE TO ADD REACTION TO A THOUGHT
+//ADD REACTION TO A THOUGHT
 router.post('/:thoughtId/reactions', async (req,res)=> {
   const newReaction = await Reaction.create(req.body);
   await Thought.findByIdAndUpdate(
@@ -102,7 +103,7 @@ router.post('/:thoughtId/reactions', async (req,res)=> {
 
 });
 
-//TODO: ROUTE TO DELETE A REACTION ON A THOUGHT
+//DELETE A REACTION ON A THOUGHT
 router.delete('/:thoughtId/reactions/:reactionId', async (req,res)=> {
  const updatedThought = await Thought.findOneAndUpdate(
     { _id: req.params.thoughtId },
