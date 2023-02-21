@@ -10,6 +10,8 @@
 
   [Usage](#usage)
 
+  [Video Walkthrough](#video-walkthrough)
+
   [Contribution](#contribution)
 
   [Testing](#testing)
@@ -30,7 +32,7 @@
 
   ## Video Walkthrough
 
-  
+  [Demo 2/21/23](https://youtu.be/30RvZW9OyAQ)
 
   ## Contribution
 
