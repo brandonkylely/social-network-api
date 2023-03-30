@@ -85,6 +85,8 @@ Thought.findOneAndDelete({ _id: req.params.thoughtId })
   // console.log(req.params.thoughtId)
 });
 
+// subdocuments
+
 //ADD REACTION TO A THOUGHT
 router.post('/:thoughtId/reactions', async (req,res)=> {
   const newReaction = await Reaction.create(req.body);
