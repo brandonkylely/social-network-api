@@ -36,7 +36,8 @@ router.get('/:userId', (req,res) => {
           console.log('Uh Oh, something went wrong');
           res.status(500).json({ error: 'Something went wrong' });
         }
-      });
+      }).select('-__v')
+      .populate('thoughts');
 })
 
 //UPDATES A SINGLE USER

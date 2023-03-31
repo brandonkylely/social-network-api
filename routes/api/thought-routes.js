@@ -21,15 +21,26 @@ router.post('/', async (req,res)=> {
     console.log(newThought)
     await User.findOneAndUpdate(
       { username: req.body.username },
-      { $push: { thoughts: newThought } },
+      { $addToSet: { thoughts: newThought._id } },
       { new: true }
-    );
-    if (newThought) {
-      res.status(200).json(newThought);
-    } else {
-      console.log('Uh Oh, something went wrong');
-      res.status(500).json({ message: 'something went wrong' });
-    }
+    )
+    .then((user) =>
+    !user
+      ? res
+          .status(404)
+          .json({ message: 'Thought created, but found no user with that ID' })
+      : res.json('Created the thought')
+  )
+  .catch((err) => {
+    console.log(err);
+    res.status(500).json(err);
+  });
+    // if (newThought) {
+    //   res.status(200).json(newThought);
+    // } else {
+    //   console.log('Uh Oh, something went wrong');
+    //   res.status(500).json({ message: 'something went wrong' });
+    // }
 });
 
 //GET SINGLE THOUGHT BASED ON THOUGHT ID
@@ -71,7 +82,7 @@ Thought.findOneAndDelete({ _id: req.params.thoughtId })
       ? res.status(404).json({ message: 'No thought with this id!' })
       : User.findOneAndUpdate(
           { username: thought.username },
-          { $pull: { thoughts: {_id: req.params.thoughtId}} },
+          { $pull: { thoughts: req.params.thoughtId} },
           { runValidators: true, new: true },
         )
   ).then((user) =>
@@ -92,7 +103,7 @@ router.post('/:thoughtId/reactions', async (req,res)=> {
   const newReaction = await Reaction.create(req.body);
   await Thought.findByIdAndUpdate(
     { _id: req.params.thoughtId },
-    { $push: { reactions: newReaction } },
+    { $addToSet: { reactions: newReaction._id } },
     { runValidators: true, new: true }
   )
 
@@ -107,17 +118,33 @@ router.post('/:thoughtId/reactions', async (req,res)=> {
 
 //DELETE A REACTION ON A THOUGHT
 router.delete('/:thoughtId/reactions/:reactionId', async (req,res)=> {
- const updatedThought = await Thought.findOneAndUpdate(
-    { _id: req.params.thoughtId },
-    { $pull: { reactions: { reactionId: req.params.reactionId } } },
-    { runValidators: true, new: true }
+//  const reactionData = await Reaction.findOneAndRemove({ _id: req.params.reactionId })
+ await Thought.findOneAndUpdate(  
+  { _id: req.params.thoughtId },
+  { $pull: { reactions: req.params.reactionId } },
+  { runValidators: true, new: true }
   )
-  if (updatedThought) {
-    res.status(200).json(updatedThought);
-  } else {
-    console.log('Uh Oh, something went wrong');
-    res.status(500).json({ message: 'something went wrong' });
-  }
+  .then((thought) =>
+  !thought
+    ? res.status(404).json({
+        message: 'Reaction deleted, but no thought found',
+      })
+    : res.json({ message: 'Reaction successfully deleted' })
+    )
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+
+    // const reactionData = await Reaction.findOneAndDelete(
+    //   { }
+    //   )
+//   if (updatedThought) {
+//     res.status(200).json(updatedThought);
+//   } else {
+//     console.log('Uh Oh, something went wrong');
+//     res.status(500).json({ message: 'something went wrong' });
+//   }
 }
 )
 
